@@ -99,11 +99,22 @@ function handleOrientation(event) {
   var beta = event.beta;  // In degree in the range [-180,180]
   var gamma = event.gamma; // In degree in the range [-90,90]
 
-  var xCenter = window.innerWidth / 2;
-  var yCenter = window.innerHeight / 2;
+  // Normalize beta and gamma values to be within the range of -1 to 1
+  var normalizedBeta = beta / 180; // Now in range [-1,1]
+  var normalizedGamma = gamma / 90; // Now in range [-1,1]
 
-  var xPosition = xCenter + (gamma / 90) * xCenter;
-  var yPosition = yCenter + (beta / 180) * yCenter;
+  // Adjust for different screen sizes and orientations
+  var screenWidth = window.innerWidth;
+  var screenHeight = window.innerHeight;
+
+  // Calculate the new position based on the normalized values and screen dimensions
+  // The + 0.5 adjustments center the spotlight when the device is not tilted
+  var xPosition = (normalizedGamma + 0.5) * screenWidth;
+  var yPosition = (normalizedBeta + 0.5) * screenHeight;
+
+  // Clamp the values to the screen dimensions to prevent the spotlight from moving out of view
+  xPosition = Math.max(0, Math.min(xPosition, screenWidth));
+  yPosition = Math.max(0, Math.min(yPosition, screenHeight));
 
   moveSpotlight(xPosition, yPosition);
 }
