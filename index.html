@@ -85,37 +85,52 @@
 <script>
   var spotlight = document.getElementById('spotlight');
 
-// Function to update spotlight position
 function moveSpotlight(x, y) {
   spotlight.style.left = x + 'px';
   spotlight.style.top = y + 'px';
 }
 
-// Event listener for mouse movement
+// Mouse movement for desktop
 document.addEventListener('mousemove', function(e) {
   moveSpotlight(e.pageX, e.pageY);
 });
 
-// Event listener for device orientation
 function handleOrientation(event) {
   var beta = event.beta;  // In degree in the range [-180,180]
   var gamma = event.gamma; // In degree in the range [-90,90]
 
-  // Calculating center position on the screen
   var xCenter = window.innerWidth / 2;
   var yCenter = window.innerHeight / 2;
 
-  // Offset the position by half the screen size to center
   var xPosition = xCenter + (gamma / 90) * xCenter;
   var yPosition = yCenter + (beta / 180) * yCenter;
 
   moveSpotlight(xPosition, yPosition);
 }
 
-// Adding the event listener for device orientation
-if (window.DeviceOrientationEvent) {
-  window.addEventListener('deviceorientation', handleOrientation);
+// iOS devices require permission to access motion and orientation
+function requestPermission() {
+  if (typeof DeviceMotionEvent.requestPermission === 'function') {
+    // Handle iOS 13+ devices
+    DeviceMotionEvent.requestPermission()
+      .then(permissionState => {
+        if (permissionState === 'granted') {
+          window.addEventListener('deviceorientation', handleOrientation);
+        } else {
+          alert('Permission to access device orientation was denied.');
+        }
+      })
+      .catch(console.error);
+  } else {
+    // Non-iOS 13+ devices do not require permission
+    window.addEventListener('deviceorientation', handleOrientation);
+  }
 }
+
+// Trigger permission request on user interaction for iOS 13+
+document.addEventListener('click', function () {
+  requestPermission();
+}, { once: true }); // Ensures the listener is removed after it runs once
 </script>
 
 </body>
